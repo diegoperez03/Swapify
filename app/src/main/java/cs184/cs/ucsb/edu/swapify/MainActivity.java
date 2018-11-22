@@ -99,7 +99,7 @@ public class MainActivity extends AppCompatActivity {
                 // Most likely auth flow was cancelled
                 default:
                     // Handle other cases
-                    Toast.makeText(getApplicationContext(), "nada ", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), "nadas ", Toast.LENGTH_SHORT).show();
 
             }
         }
