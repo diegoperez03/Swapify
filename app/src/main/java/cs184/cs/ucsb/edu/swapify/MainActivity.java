@@ -5,6 +5,7 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.spotify.android.appremote.api.ConnectionParams;
@@ -18,26 +19,34 @@ import com.spotify.sdk.android.authentication.AuthenticationClient;
 import com.spotify.sdk.android.authentication.AuthenticationRequest;
 import com.spotify.sdk.android.authentication.AuthenticationResponse;
 
+import kaaes.spotify.webapi.android.SpotifyApi;
+import kaaes.spotify.webapi.android.SpotifyService;
+import kaaes.spotify.webapi.android.models.Album;
+import kaaes.spotify.webapi.android.models.UserPrivate;
+import kaaes.spotify.webapi.android.models.UserPublic;
+import retrofit.Callback;
+import retrofit.RetrofitError;
+import retrofit.client.Response;
+
 
 public class MainActivity extends AppCompatActivity {
     private static final String CLIENT_ID = "10bc6410b98746ad835baaa88574134d";
-    private static final String REDIRECT_URI = "https://www.google.com/";
+    private static final String REDIRECT_URI = "com.yourdomain.yourapp://callback";
     private SpotifyAppRemote mSpotifyAppRemote;
     private static final int REQUEST_CODE = 1337;
-
+    private SpotifyApi api;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
 
         AuthenticationRequest.Builder builder =
                 new AuthenticationRequest.Builder(CLIENT_ID, AuthenticationResponse.Type.TOKEN, REDIRECT_URI);
 
         builder.setScopes(new String[]{"streaming"});
         AuthenticationRequest request = builder.build();
-
         AuthenticationClient.openLoginActivity(this, REQUEST_CODE, request);
+        api = new SpotifyApi();
     }
 
     @Override
@@ -45,9 +54,8 @@ public class MainActivity extends AppCompatActivity {
         super.onStart();
         // We will start writing our code here.
 
-
-
     }
+
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
@@ -60,32 +68,46 @@ public class MainActivity extends AppCompatActivity {
                 // Response was successful and contains auth token
                 case TOKEN:
                     // Handle successful response
-                    String token = response.getAccessToken();
-                    Toast.makeText(getApplicationContext(), "works", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), "worked ", Toast.LENGTH_SHORT).show();
+                    api.setAccessToken(response.getAccessToken());
+                    SpotifyService spotify = api.getService();
+                    spotify.getMe(new Callback<UserPrivate>() {
+                        @Override
+                        public void success(UserPrivate userPrivate, Response response) {
+                            Log.d("user",userPrivate.display_name);
+                            TextView temp = findViewById(R.id.welcome);
+                            temp.setText("Welcome " + userPrivate.display_name);
+                        }
+
+                        @Override
+                        public void failure(RetrofitError error) {
+                            Log.d("user","didnt work");
+                        }
+                    });
+
+
+
                     break;
 
                 // Auth flow returned an error
                 case ERROR:
                     // Handle error response
-                    Toast.makeText(getApplicationContext(), "Doesnt work", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), response.getError(), Toast.LENGTH_SHORT).show();
 
                     break;
 
                 // Most likely auth flow was cancelled
                 default:
-                    Toast.makeText(getApplicationContext(), "Something else", Toast.LENGTH_SHORT).show();
-
                     // Handle other cases
+                    Toast.makeText(getApplicationContext(), "nada ", Toast.LENGTH_SHORT).show();
+
             }
         }
     }
 
 
 
-    private void connected() {
-        // Then we will write some more code here.
-        mSpotifyAppRemote.getPlayerApi().play("spotify:user:spotify:playlist:37i9dQZF1DX2sUQwD7tbmL");
-    }
+
 
     @Override
     protected void onStop() {
