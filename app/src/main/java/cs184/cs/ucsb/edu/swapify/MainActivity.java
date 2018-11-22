@@ -75,7 +75,7 @@ public class MainActivity extends AppCompatActivity {
                         @Override
                         public void success(UserPrivate userPrivate, Response response) {
                             Log.d("user",userPrivate.display_name);
-                            TextView temp = findViewById(R.id.welcome);
+                            TextView temp = findViewById(R.id.Welcome);
                             temp.setText("Welcome " + userPrivate.display_name);
                         }
 
@@ -99,7 +99,7 @@ public class MainActivity extends AppCompatActivity {
                 // Most likely auth flow was cancelled
                 default:
                     // Handle other cases
-                    Toast.makeText(getApplicationContext(), "nadas ", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), "nada ", Toast.LENGTH_SHORT).show();
 
             }
         }
