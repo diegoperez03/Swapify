@@ -28,6 +28,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //You can set the layout to welcome if you want the welcome screen right away
+        //Or we can have it open up after sign in is confirmed
         setContentView(R.layout.activity_main);
 
 
