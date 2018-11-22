@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Swapify</string>
+    <string name="WelcomeText">Welcome to Swapify USERNAME</string>
+    <string name="WelcomeDescription">Freshen up your playlists with the simple click of a button!</string>
 </resources>
