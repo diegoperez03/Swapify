@@ -1,10 +1,12 @@
 package cs184.cs.ucsb.edu.swapify;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -18,10 +20,17 @@ import com.spotify.protocol.types.Track;
 import com.spotify.sdk.android.authentication.AuthenticationClient;
 import com.spotify.sdk.android.authentication.AuthenticationRequest;
 import com.spotify.sdk.android.authentication.AuthenticationResponse;
+import com.squareup.picasso.Picasso;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.Album;
+import kaaes.spotify.webapi.android.models.Pager;
+import kaaes.spotify.webapi.android.models.Playlist;
+import kaaes.spotify.webapi.android.models.PlaylistSimple;
 import kaaes.spotify.webapi.android.models.UserPrivate;
 import kaaes.spotify.webapi.android.models.UserPublic;
 import retrofit.Callback;
@@ -35,6 +44,7 @@ public class MainActivity extends AppCompatActivity {
     private SpotifyAppRemote mSpotifyAppRemote;
     private static final int REQUEST_CODE = 1337;
     private SpotifyApi api;
+    ImageView temp;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,6 +57,8 @@ public class MainActivity extends AppCompatActivity {
         AuthenticationRequest request = builder.build();
         AuthenticationClient.openLoginActivity(this, REQUEST_CODE, request);
         api = new SpotifyApi();
+
+        temp = findViewById(R.id.image);
     }
 
     @Override
@@ -68,26 +80,32 @@ public class MainActivity extends AppCompatActivity {
                 // Response was successful and contains auth token
                 case TOKEN:
                     // Handle successful response
-                    Toast.makeText(getApplicationContext(), "worked ", Toast.LENGTH_SHORT).show();
                     api.setAccessToken(response.getAccessToken());
                     SpotifyService spotify = api.getService();
-                    spotify.getMe(new Callback<UserPrivate>() {
+
+
+                    final Map<String,Object> playlistObj = new HashMap<String,Object>();
+                    spotify.getMyPlaylists(new Callback<Pager<PlaylistSimple>>() {
                         @Override
-                        public void success(UserPrivate userPrivate, Response response) {
-                            Log.d("user",userPrivate.display_name);
-                            TextView temp = findViewById(R.id.Welcome);
-                            temp.setText("Welcome " + userPrivate.display_name);
+                        public void success(Pager<PlaylistSimple> playlistSimplePager, Response response) {
+                            for(PlaylistSimple s : playlistSimplePager.items) {
+                                if(s.images.size() > 1){
+                                    String url = s.images.get(1).url;
+                                    Picasso.get()
+                                            .load(url)
+                                            .resize(200,200)
+                                            .into(temp);
+                                    Log.d("user", s.name + " " + s.owner.display_name + " ");
+                                }
+
+                            }
                         }
 
                         @Override
                         public void failure(RetrofitError error) {
-                            Log.d("user","didnt work");
+
                         }
                     });
-
-
-
-                    break;
 
                 // Auth flow returned an error
                 case ERROR:
